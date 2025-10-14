@@ -184,10 +184,6 @@ def hungarian_v(cost):
 
 # Απλή εκδοχή: χωρίς v
 def print_assignment_simple(cost_table):
-    # Πίνακας κόστους όπως στο PDF (ακέραιοι με κόμμα-κενό)
-    for row in cost_table:
-        print(", ".join(num_no_float(x) for x in row))
-    print()
 
     # Τελικό matching + κόστος
     assignment, total_cost = hungarian(cost_table)
