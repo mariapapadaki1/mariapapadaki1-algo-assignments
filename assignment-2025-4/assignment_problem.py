@@ -99,6 +99,15 @@ def hungarian_v(cost):
     r = [0]   * (n + 1)    # r[j]: ποια γραμμή είναι matched στη στήλη j (0=καμία)
     pro = [0] * (n + 1)    # pro[j]: προκάτοχος στήλης j στο augmenting path
 
+    def print_matching_row_order(rmap):
+        # εκτύπωση "Matching: R0->C?, R1->C?, ..." με ΣΕΙΡΑ ΓΡΑΜΜΩΝ
+        pairs = []
+        for i in range(1, n + 1):
+            col = next((j - 1 for j in range(1, n + 1) if rmap[j] == i), None)
+            if col is not None:
+                pairs.append(f"R{i-1}->C{col}")
+        print("Matching: " + ", ".join(pairs))
+
     for i in range(1, n + 1):
         print(f"\n--- Matching size {i - 1}, start from free row r={i - 1} ---")
         r[0] = i
@@ -107,12 +116,12 @@ def hungarian_v(cost):
         j0 = 0
         S, T = set(), set()
         S.add(i - 1)
-        print(f"Set S: {S}")
-        print(f"Set T: {T}")
+        print(f"Set S: {{ {', '.join(str(x) for x in sorted(S))} }}")
+        print(f"Set T: {{ {', '.join(str(x) for x in sorted(T))} }}")
 
         while True:
             used[j0] = True
-            i0 = r[j0]                      # γραμμή που αντιστοιχεί στη j0
+            i0 = r[j0]
             delta = float("inf")
             j1 = 0
 
@@ -125,7 +134,7 @@ def hungarian_v(cost):
                     if minv[j] < delta:
                         delta = minv[j]; j1 = j
 
-            for j in range(0, n + 1):       # ενημέρωση labels & slacks
+            for j in range(0, n + 1):
                 if used[j]:
                     u[r[j]] += delta
                     v[j]     -= delta
@@ -140,45 +149,57 @@ def hungarian_v(cost):
                 matched_row = r[j0] - 1
                 print(f"Tight edge discovered: ({i0 - 1}, {j0 - 1}). Column {j0 - 1} is matched to row {matched_row}: EXTEND TREE")
                 S.add(matched_row); T.add(j0 - 1)
-                print(f"Set S: {S}")
-                print(f"Set T: {T}")
+                print(f"Set S: {{ {', '.join(str(x) for x in sorted(S))} }}")
+                print(f"Set T: {{ {', '.join(str(x) for x in sorted(T))} }}")
 
-                # ενημερωτικό: αν δεν υπάρχει tight edge εκτός Τ, δείξε το delta
-                if all(minv[j] > 0 for j in range(1, n + 1) if not used[j]):
-                    dd = min(minv[j] for j in range(1, n + 1) if not used[j])
-                    print(f"No tight edge outside T. Update potentials by delta={dd:.0f}")
-                    print("U:", format_vector(u[1:]))
-                    print("V:", format_vector(v[1:]))
+        # ===== AUGMENT =====
+        # 1) Φτιάχνουμε το μονοπάτι και τις ακμές που ΘΑ προστεθούν, ΧΩΡΙΣ να αλλάξουμε ακόμη το r
+        old_r = r.copy()
+        edges_to_add = []      # [(row, col), ...] με σειρά από ρίζα -> ελεύθερη στήλη
+        path_elems = []
+        j1 = j0
+        while True:
+            j_prev = pro[j1]
+            row = old_r[j_prev] - 1
+            col = j1 - 1
+            edges_to_add.append((row, col))
+            path_elems.append(f"R{row}->C{col}")
+            j1 = j_prev
+            if j1 == 0:
+                break
+        print("Augmenting path:", " ".join(reversed(path_elems)))
 
-        # AUGMENT: backtrack και flip των ακμών
-        path = []
+        # 2) Πρώτα δείχνουμε το ΠΑΛΙΟ matching (όπως στο screenshot)
+        print_matching_row_order(old_r)
+
+        # 3) Τώρα "Adding edge …" για κάθε ακμή του augmenting path (με τη σωστή σειρά)
+        for row, col in edges_to_add:
+            print(f"Adding edge R{row}->C{col}")
+
+        # 4) Εφαρμόζουμε πράγματι το augment (flip) πάνω στο r
         j1 = j0
         while True:
             j_prev = pro[j1]
             r[j1] = r[j_prev]
-            path.append(f"R{r[j1]-1}->C{j1-1}")
             j1 = j_prev
             if j1 == 0:
                 break
-        print("Augmenting path:", "=>".join(reversed(path)))
 
-        print("Matching:", end=" ")
-        for j in range(1, n + 1):
-            if r[j] != 0:
-                print(f"R{r[j]-1}->C{j-1}", end=", ")
+        # 5) Τελικό matching (σε σειρά γραμμών)
         print()
+        print_matching_row_order(r)
 
     # τελική εκτύπωση
     assignment = [-1] * n
     total = 0.0
     for j in range(1, n + 1):
-        i = r[j]
-        assignment[i - 1] = j - 1
-        total += cost[i - 1][j - 1]
+        irow = r[j]
+        assignment[irow - 1] = j - 1
+        total += cost[irow - 1][j - 1]
 
     print("\n=== Final Result ===")
-    for i, j in enumerate(assignment):
-        print(f"row {i} -> col {j} cost={cost[i][j]:.1f}")
+    for irow, jcol in enumerate(assignment):
+        print(f"row {irow} -> col {jcol} cost={cost[irow][jcol]:.1f}")
     print(f"Total cost: {total:.1f}")
 
 
