@@ -1,5 +1,5 @@
 import sys
-# Διαβάζει πίνακα κόστους και ελέγχει ότι είναι τετράγωνος
+# Διαβάζει τον πίνακα κόστους
 def read_costs(filename):
     cost_table = []
     with open(filename, "r", encoding="utf-8") as f:
@@ -10,25 +10,19 @@ def read_costs(filename):
             parts = line.split(",") if "," in line else line.split()
             row = [float(x) for x in parts]
             cost_table.append(row)
-    n = len(cost_table)
-    if n == 0 or any(len(r) != n for r in cost_table):
-        raise ValueError("Ο πίνακας κόστους πρέπει να είναι τετράγωνος και μη κενός.")
     return cost_table
-
-
-
-# Βοηθητικές μορφοποιήσεις προς εκτύπωση
+        
+# Συναρτήσεις για εκτύπωση 
 
 def num_no_float(x: float) -> str:
-    """Επιστρέφει '2' αντί για '2.0' όταν γίνεται."""
+    #Επιστρέφει πχ '2' αντί για '2.0' όταν γίνεται
     return str(int(x)) if float(x).is_integer() else str(x)
 
 def format_vector(vec):
-    """Μορφοποίηση διανύσματος για labels U,V."""
     return "[ " + " ".join(f"{v:.2f}" for v in vec) + " ]"
 
 
-# Hungarian  - μόνο αποτέλεσμα (για απλή εκδοχή)
+# Hungarian απλή εκδοχή 
 
 def hungarian(cost):
     n = len(cost)
