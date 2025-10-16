@@ -26,7 +26,7 @@ def format_vector(vec):
 
 def hungarian(cost):
     n = len(cost)
-    u = [0.0] * (n + 1)    # labels για γραμμές
+    u = [0.0] + [min(row) for row in cost]
     v = [0.0] * (n + 1)    # labels για στήλες
     p = [0]   * (n + 1)    # p[j]: ποια γραμμή είναι matched στη στήλη j
     way = [0] * (n + 1)    # way[j]: προκάτοχος στήλης για το augmenting path
@@ -88,7 +88,7 @@ def hungarian(cost):
 
 def hungarian_v(cost):
     n = len(cost)
-    u = [0.0] * (n + 1)
+    u = [0.0] + [min(row) for row in cost]
     v = [0.0] * (n + 1)
     r = [0]   * (n + 1)    # r[j]: ποια γραμμή είναι matched στη στήλη j (0=καμία)
     pro = [0] * (n + 1)    # pro[j]: προκάτοχος στήλης j στο augmenting path
