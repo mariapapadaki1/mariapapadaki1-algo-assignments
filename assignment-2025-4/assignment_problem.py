@@ -29,29 +29,29 @@ def hungarian(cost):
         minv = [float("inf")] * (n + 1)
         used = [False] * (n + 1)
         j0 = 0
-        while True:
+        while True: # XTIZEI TO ΕΝΑΛΑΣΣΟΜΕΝΟ MONOΠΑΤΙ ΤΟΥ ΔΕΝΤΡΟΥ ΜΕΧΡΙ ΝΑ ΒΡΕΙ ΕΛΕΥΘΕΡΗ ΣΤΗΛΗ
             used[j0] = True
             i0 = p[j0]
-            delta = float("inf")
+            delta = float("inf")  # ΑΡΧΙΚΟΠΟΙΗΣΗ
             j1 = 0
             for j in range(1, n + 1):
-                if not used[j]:
-                    cur = cost[i0 - 1][j - 1] - u[i0] - v[j]
+                if not used[j]: # ΣΤΗΛΕΣ ΠΟΥ ΔΕΝ ΕΙΝΑΙ ΣΤΟ ΔΕΝΤΡΟ
+                    cur = cost[i0 - 1][j - 1] - u[i0] - v[j] 
                     if cur < minv[j]:
                         minv[j] = cur
-                        way[j] = j0
+                        way[j] = j0 # ΚΡΑΤΑΕΙ ΠΡΟΚΑΤΟΧΟ ΤΗΝ ΤΡΕΧΟΥΣΑ ΣΤΗΛΗ ΓΙΑ ΝΑ ΞΕΡΟΥΜΕ ΑΠΟ ΠΟΥ ΗΡΘΑΜΕ
                     if minv[j] < delta:
                         delta = minv[j]
                         j1 = j
             for j in range(0, n + 1):
-                if used[j]:
+                if used[j]: 
                     u[p[j]] += delta
                     v[j] -= delta
                 else:
                     minv[j] -= delta
-            j0 = j1
-            if p[j0] == 0:
-                break
+        j0 = j1
+        if p[j0] == 0:
+            break
         while True:
             j1 = way[j0]
             p[j0] = p[j1]
@@ -73,31 +73,32 @@ def hungarian_v(cost):
     pro = [0] * (n + 1)
     EPS = 1e-12
 
-    def print_header_and_matrix():
+
+    def print_header():
         print("===AssignmentProblem===")
         print(f"{n}x{n} cost matrix:")
         for row in cost:
             print(" ".join(f"{x:.2f}" for x in row))
 
-    def fmt_vec(vec):
+    def format(vec):
         return "[ " + " ".join(f"{x:.2f}" for x in vec[1:]) + " ]"
 
     def print_initial_potentials():
         print("Initial potentials:")
-        print("U:", fmt_vec(u))
-        print("V:", fmt_vec(v))
+        print("U:", format(u))
+        print("V:", format(v))
 
-    def print_phase_start(i0):
+    def print_beggining(i0):
         print(f"--- Matching size {i0}, start from free row r={i0} ---")
 
     def print_sets(S, T):
-        def fmt_set(st):
+        def format_set(st):
             if not st:
                 return "{}"
             lst = sorted(st)
             return "{ " + ", ".join(str(x) for x in lst) + " }"
-        print(f"Set S: {fmt_set(S)}")
-        print(f"Set T: {fmt_set(T)}")
+        print(f"Set S: {format_set(S)}")
+        print(f"Set T: {format_set(T)}")
 
     def print_tight_edge(i0, j0, is_free, matched_row=None):
         if is_free:
@@ -107,8 +108,8 @@ def hungarian_v(cost):
 
     def print_update_potentials(delta):
         print(f"No tight edge outside T. Update potentials by delta={int(delta) if abs(delta-round(delta))<EPS else f'{delta:g}'}")
-        print("U:", fmt_vec(u))
-        print("V:", fmt_vec(v))
+        print("U:", format(u))
+        print("V:", format(v))
 
     def print_matching_pairs():
         pairs = []
@@ -156,11 +157,11 @@ def hungarian_v(cost):
             r[j] = i
             j = j_prev
 
-    print_header_and_matrix()
+    print_header()
     print_initial_potentials()
 
     for i in range(1, n + 1):
-        print_phase_start(i - 1)
+        print_beggining(i - 1)
         r[0] = i
         minv = [float("inf")] * (n + 1)
         used = [False] * (n + 1)
@@ -169,21 +170,25 @@ def hungarian_v(cost):
         S.add(i - 1)
         print_sets(S, T)
 
-        while True:
-            used[j0] = True
-            i0 = r[j0]
-            delta = float("inf")
-            j1 = 0
+    while True:
+        used[j0] = True
+        i0 = r[j0]
+        delta = float("inf")
+        j1 = 0     
 
-            for j in range(1, n + 1):
-                if not used[j]:
-                    cur = cost[i0 - 1][j - 1] - u[i0] - v[j]
-                    if cur < minv[j] - EPS:
-                        minv[j] = cur
-                        pro[j] = j0
-                    if (minv[j] < delta - EPS) or (abs(minv[j] - delta) <= EPS and r[j] == 0):
-                        delta = minv[j]
-                        j1 = j
+        for j in range(1, n + 1):
+            if not used[j]:
+                cur = cost[i0 - 1][j - 1] - u[i0] - v[j]
+            if cur < minv[j] - EPS:
+                minv[j] = cur
+                pro[j] = j0
+
+            if minv[j] < delta - EPS:
+             delta = minv[j]
+             j1 = j
+            elif abs(minv[j] - delta) <= EPS:
+                if j1 == 0 or (r[j1] != 0 and r[j] == 0):
+                    j1 = j
 
             for j in range(0, n + 1):
                 if used[j]:
@@ -212,20 +217,17 @@ def hungarian_v(cost):
                 T.add(j_print)
                 print_sets(S, T)
 
-    assignment = []
-    total = 0.0
-    print("=== Final Result ===")
-    for i in range(n):
-        col = next(j for j in range(1, n + 1) if r[j] == i + 1) - 1
-        val = cost[i][col]
-        total += val
-        print(f"row {i}-> col {col} cost={val:.1f}")
-        assignment.append((i, col))
-    print(f"Total cost: {total:.1f}")
-    return assignment, total
-
-
-
+        assignment = []
+        total = 0.0
+        print("=== Final Result ===")
+        for i in range(n):
+            col = next(j for j in range(1, n + 1) if r[j] == i + 1) - 1
+            val = cost[i][col]
+            total += val
+            print(f"row {i}-> col {col} cost={val:.1f}")
+            assignment.append((i, col))
+            print(f"Total cost: {total:.1f}")
+        return assignment, total
 
    
 def print_assignment_simple(cost_table):
