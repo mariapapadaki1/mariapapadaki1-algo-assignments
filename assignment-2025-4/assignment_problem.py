@@ -79,15 +79,15 @@ def hungarian_v(cost):
         for row in cost:
             print(" ".join(f"{x:.2f}" for x in row))
 
-    def fmt_vec(vec):
+    def format(vec):
         return "[ " + " ".join(f"{x:.2f}" for x in vec[1:]) + " ]"
 
     def print_initial_potentials():
         print("Initial potentials:")
-        print("U:", fmt_vec(u))
-        print("V:", fmt_vec(v))
+        print("U:", format(u))
+        print("V:", format(v))
 
-    def print_phase_start(i0):
+    def print_start(i0):
         print(f"--- Matching size {i0}, start from free row r={i0} ---")
 
     def print_sets(S, T):
@@ -107,8 +107,8 @@ def hungarian_v(cost):
 
     def print_update_potentials(delta):
         print(f"No tight edge outside T. Update potentials by delta={int(delta) if abs(delta-round(delta))<EPS else f'{delta:g}'}")
-        print("U:", fmt_vec(u))
-        print("V:", fmt_vec(v))
+        print("U:", format(u))
+        print("V:", format(v))
 
     def print_matching_pairs():
         pairs = []
@@ -159,7 +159,7 @@ def hungarian_v(cost):
     print_initial_potentials()
 
     for i in range(1, n + 1):
-        print_phase_start(i - 1)
+        print_start(i - 1)
         r[0] = i
         minv = [float("inf")] * (n + 1)
         used = [False] * (n + 1)
