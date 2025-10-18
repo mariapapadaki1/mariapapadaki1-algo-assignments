@@ -155,7 +155,6 @@ def hungarian_v(cost):
             print_add_edge(i - 1, j - 1)
             r[j] = i
             j = j_prev
-    print_matching_pairs()
     print_header_and_matrix()
     print_initial_potentials()
 
@@ -211,6 +210,8 @@ def hungarian_v(cost):
                 S.add(matched_row)
                 T.add(j_print)
                 print_sets(S, T)
+        print_matching_pairs()
+
 
     assignment = []
     total = 0.0
