@@ -1,5 +1,6 @@
 import sys
 
+
 def read_costs(filename):
     cost_table = []
     with open(filename, "r", encoding="utf-8") as f:
@@ -12,11 +13,14 @@ def read_costs(filename):
             cost_table.append(row)
     return cost_table
 
+
 def num_no_float(x: float) -> str:
     return str(int(x)) if float(x).is_integer() else str(x)
 
+
 def format_vector(vec):
     return "[ " + " ".join(f"{v:.2f}" for v in vec) + " ]"
+
 
 def hungarian(cost):
     n = len(cost)
@@ -29,29 +33,29 @@ def hungarian(cost):
         minv = [float("inf")] * (n + 1)
         used = [False] * (n + 1)
         j0 = 0
-        while True: # XTIZEI TO ΕΝΑΛΑΣΣΟΜΕΝΟ MONOΠΑΤΙ ΤΟΥ ΔΕΝΤΡΟΥ ΜΕΧΡΙ ΝΑ ΒΡΕΙ ΕΛΕΥΘΕΡΗ ΣΤΗΛΗ
+        while True:
             used[j0] = True
             i0 = p[j0]
-            delta = float("inf")  # ΑΡΧΙΚΟΠΟΙΗΣΗ
+            delta = float("inf")
             j1 = 0
             for j in range(1, n + 1):
-                if not used[j]: # ΣΤΗΛΕΣ ΠΟΥ ΔΕΝ ΕΙΝΑΙ ΣΤΟ ΔΕΝΤΡΟ
-                    cur = cost[i0 - 1][j - 1] - u[i0] - v[j] 
+                if not used[j]:
+                    cur = cost[i0 - 1][j - 1] - u[i0] - v[j]
                     if cur < minv[j]:
                         minv[j] = cur
-                        way[j] = j0 # ΚΡΑΤΑΕΙ ΠΡΟΚΑΤΟΧΟ ΤΗΝ ΤΡΕΧΟΥΣΑ ΣΤΗΛΗ ΓΙΑ ΝΑ ΞΕΡΟΥΜΕ ΑΠΟ ΠΟΥ ΗΡΘΑΜΕ
+                        way[j] = j0
                     if minv[j] < delta:
                         delta = minv[j]
                         j1 = j
             for j in range(0, n + 1):
-                if used[j]: 
+                if used[j]:
                     u[p[j]] += delta
                     v[j] -= delta
                 else:
                     minv[j] -= delta
-        j0 = j1
-        if p[j0] == 0:
-            break
+            j0 = j1
+            if p[j0] == 0:
+                break
         while True:
             j1 = way[j0]
             p[j0] = p[j1]
@@ -65,6 +69,8 @@ def hungarian(cost):
         assignment[i - 1] = j - 1
         total += cost[i - 1][j - 1]
     return assignment, total
+
+
 def hungarian_v(cost):
     n = len(cost)
     u = [0] + [min(row) for row in cost]
@@ -72,7 +78,6 @@ def hungarian_v(cost):
     r = [0] * (n + 1)
     pro = [0] * (n + 1)
     EPS = 1e-12
-
 
     def print_header():
         print("===AssignmentProblem===")
@@ -107,7 +112,8 @@ def hungarian_v(cost):
             print(f"Tight edge discovered: ({i0}, {j0}). Column {j0} is matched to row {matched_row}: EXTEND TREE")
 
     def print_update_potentials(delta):
-        print(f"No tight edge outside T. Update potentials by delta={int(delta) if abs(delta-round(delta))<EPS else f'{delta:g}'}")
+        disp = int(delta) if abs(delta - round(delta)) < EPS else f"{delta:g}"
+        print(f"No tight edge outside T. Update potentials by delta={disp}")
         print("U:", format(u))
         print("V:", format(v))
 
@@ -138,14 +144,13 @@ def hungarian_v(cost):
             start_col = seq[-1] - 1
             path_parts = [f"R{free_row}->C{start_col}"]
             for k in range(len(seq) - 1, 1, -1):
-                row_k = r[seq[k-1]] - 1
-                col_k = seq[k-2] - 1
+                row_k = r[seq[k - 1]] - 1
+                col_k = seq[k - 2] - 1
                 path_parts.append(f"R{row_k}->C{col_k}")
             row_last = r[seq[1]] - 1
             col_last = seq[0] - 1
             path_parts.append(f"R{row_last}->C{col_last}")
             print("Augmenting path: " + "=>".join(path_parts))
-
         print_matching_pairs()
         j = j_free
         while j != 0:
@@ -157,6 +162,7 @@ def hungarian_v(cost):
             r[j] = i
             j = j_prev
 
+    print_matching_pairs()
     print_header()
     print_initial_potentials()
 
@@ -169,39 +175,32 @@ def hungarian_v(cost):
         S, T = set(), set()
         S.add(i - 1)
         print_sets(S, T)
-
-    while True:
-        used[j0] = True
-        i0 = r[j0]
-        delta = float("inf")
-        j1 = 0     
-
-        for j in range(1, n + 1):
-            if not used[j]:
-                cur = cost[i0 - 1][j - 1] - u[i0] - v[j]
-            if cur < minv[j] - EPS:
-                minv[j] = cur
-                pro[j] = j0
-
-            if minv[j] < delta - EPS:
-             delta = minv[j]
-             j1 = j
-            elif abs(minv[j] - delta) <= EPS:
-                if j1 == 0 or (r[j1] != 0 and r[j] == 0):
-                    j1 = j
-
+        while True:
+            used[j0] = True
+            i0 = r[j0]
+            delta = float("inf")
+            j1 = 0
+            for j in range(1, n + 1):
+                if not used[j]:
+                    cur = cost[i0 - 1][j - 1] - u[i0] - v[j]
+                    if cur < minv[j] - EPS:
+                        minv[j] = cur
+                        pro[j] = j0
+                    if minv[j] < delta - EPS:
+                        delta = minv[j]
+                        j1 = j
+                    elif abs(minv[j] - delta) <= EPS:
+                        if j1 == 0 or (r[j1] != 0 and r[j] == 0):
+                            j1 = j
             for j in range(0, n + 1):
                 if used[j]:
                     u[r[j]] += delta
                     v[j] -= delta
                 else:
                     minv[j] -= delta
-
             if delta > EPS:
                 print_update_potentials(delta)
-
             j0 = j1
-
             if r[j0] == 0:
                 i_print = i0 - 1
                 j_print = j0 - 1
@@ -217,24 +216,25 @@ def hungarian_v(cost):
                 T.add(j_print)
                 print_sets(S, T)
 
-        assignment = []
-        total = 0.0
-        print("=== Final Result ===")
-        for i in range(n):
-            col = next(j for j in range(1, n + 1) if r[j] == i + 1) - 1
-            val = cost[i][col]
-            total += val
-            print(f"row {i}-> col {col} cost={val:.1f}")
-            assignment.append((i, col))
-            print(f"Total cost: {total:.1f}")
-        return assignment, total
+    assignment = []
+    total = 0.0
+    print("=== Final Result ===")
+    for i in range(n):
+        col = next(j for j in range(1, n + 1) if r[j] == i + 1) - 1
+        val = cost[i][col]
+        total += val
+        print(f"row {i}-> col {col} cost={val:.1f}")
+        assignment.append((i, col))
+    print(f"Total cost: {total:.1f}")
+    return assignment, total
 
-   
+
 def print_assignment_simple(cost_table):
     assignment, total_cost = hungarian(cost_table)
     for i, j in enumerate(assignment):
         print(f"row {i} -> col {j} cost={cost_table[i][j]:.1f}")
     print(f"Total cost: {total_cost:.1f}")
+
 
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "-v":
@@ -245,6 +245,7 @@ def main():
         filename = "costs_1.csv" if len(sys.argv) == 1 else sys.argv[1]
         cost_table = read_costs(filename)
         print_assignment_simple(cost_table)
+
 
 if __name__ == "__main__":
     main()
