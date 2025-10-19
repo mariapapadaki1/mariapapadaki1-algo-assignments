@@ -180,7 +180,8 @@ def hungarian_v(cost):
                     if cur < minv[j] - EPS:
                         minv[j] = cur
                         pro[j] = j0
-                    if (minv[j] < delta - EPS) or (abs(minv[j] - delta) <= EPS and r[j] == 0):
+                    
+                    if (minv[j] < delta - EPS) or (abs(minv[j] - delta) <= EPS and (j1 == 0 or j < j1)):
                         delta = minv[j]
                         j1 = j
 
