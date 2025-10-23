@@ -1,4 +1,3 @@
-
 import sys
 
 def read_costs(filename):
@@ -24,7 +23,7 @@ def hungarian(cost):
     u = [0] + [min(row) for row in cost]
     v = [0.0] * (n + 1)
     p = [0] * (n + 1)
-    pro1 = [0] * (n + 1)
+    way = [0] * (n + 1)
     for i in range(1, n + 1):
         p[0] = i
         minv = [float("inf")] * (n + 1)
@@ -40,8 +39,19 @@ def hungarian(cost):
                     cur = cost[i0 - 1][j - 1] - u[i0] - v[j]
                     if cur < minv[j]:
                         minv[j] = cur
-                        pro1[j] = j0
-                    if minv[j] < delta:
+                        way[j] = j0
+                    better = False
+                    if (minv[j] < delta) or (j1 == 0):
+                        better = True
+                    elif minv[j] == delta:
+                        if (p[j] == 0) and (p[j1] != 0):
+                            better = True
+                        elif ((p[j] == 0) == (p[j1] == 0)):
+                            if cost[i0 - 1][j - 1] < cost[i0 - 1][j1 - 1]:
+                                better = True
+                            elif cost[i0 - 1][j - 1] == cost[i0 - 1][j1 - 1] and j < j1:
+                                better = True
+                    if better:
                         delta = minv[j]
                         j1 = j
             for j in range(0, n + 1):
@@ -54,7 +64,7 @@ def hungarian(cost):
             if p[j0] == 0:
                 break
         while True:
-            j1 = pro1[j0]
+            j1 = way[j0]
             p[j0] = p[j1]
             j0 = j1
             if j0 == 0:
@@ -66,6 +76,7 @@ def hungarian(cost):
         assignment[i - 1] = j - 1
         total += cost[i - 1][j - 1]
     return assignment, total
+
 def hungarian_v(cost):
     n = len(cost)
     u = [0] + [min(row) for row in cost]
@@ -111,7 +122,7 @@ def hungarian_v(cost):
         print("U:", format(u))
         print("V:", format(v))
 
-    def print_is_matched():
+    def print_matching_pairs():
         pairs = []
         for i in range(1, n + 1):
             col = next((j for j in range(1, n + 1) if r[j] == i), None)
@@ -146,7 +157,7 @@ def hungarian_v(cost):
             path_parts.append(f"R{row_last}->C{col_last}")
             print("Augmenting path: " + "=>".join(path_parts))
 
-        print_is_matched()
+        print_matching_pairs()
         j = j_free
         while j != 0:
             j_prev = pro[j]
@@ -181,7 +192,18 @@ def hungarian_v(cost):
                     if cur < minv[j] - EPS:
                         minv[j] = cur
                         pro[j] = j0
-                    if (minv[j] < delta - EPS) or (abs(minv[j] - delta) <= EPS and r[j] == 0):
+                    better = False
+                    if (minv[j] < delta - EPS) or (j1 == 0):
+                        better = True
+                    elif abs(minv[j] - delta) <= EPS:
+                        if (r[j] == 0) and (j1 != 0) and (r[j1] != 0):
+                            better = True
+                        elif (j1 != 0) and ((r[j] == 0) == (r[j1] == 0)):
+                            if cost[i0 - 1][j - 1] < cost[i0 - 1][j1 - 1] - EPS:
+                                better = True
+                            elif abs(cost[i0 - 1][j - 1] - cost[i0 - 1][j1 - 1]) <= EPS and j < j1:
+                                better = True
+                    if better:
                         delta = minv[j]
                         j1 = j
 
@@ -211,8 +233,7 @@ def hungarian_v(cost):
                 S.add(matched_row)
                 T.add(j_print)
                 print_sets(S, T)
-        print_is_matched()
-
+        print_matching_pairs()
 
     assignment = []
     total = 0.0
@@ -226,10 +247,6 @@ def hungarian_v(cost):
     print(f"Total cost: {total:.1f}")
     return assignment, total
 
-
-
-
-   
 def print_assignment_simple(cost_table):
     assignment, total_cost = hungarian(cost_table)
     for i, j in enumerate(assignment):
