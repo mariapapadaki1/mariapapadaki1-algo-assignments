@@ -1,3 +1,4 @@
+
 import sys
 
 def read_costs(filename):
@@ -110,7 +111,7 @@ def hungarian_v(cost):
         print("U:", format(u))
         print("V:", format(v))
 
-    def  print_is_matched():
+    def print_is_matched():
         pairs = []
         for i in range(1, n + 1):
             col = next((j for j in range(1, n + 1) if r[j] == i), None)
@@ -145,7 +146,7 @@ def hungarian_v(cost):
             path_parts.append(f"R{row_last}->C{col_last}")
             print("Augmenting path: " + "=>".join(path_parts))
 
-         print_is_matched()
+        print_is_matched()
         j = j_free
         while j != 0:
             j_prev = pro[j]
@@ -180,8 +181,7 @@ def hungarian_v(cost):
                     if cur < minv[j] - EPS:
                         minv[j] = cur
                         pro[j] = j0
-                    
-                    if (minv[j] < delta - EPS) or (abs(minv[j] - delta) <= EPS and (j1 == 0 or j < j1)):
+                    if (minv[j] < delta - EPS) or (abs(minv[j] - delta) <= EPS and r[j] == 0):
                         delta = minv[j]
                         j1 = j
 
@@ -211,7 +211,7 @@ def hungarian_v(cost):
                 S.add(matched_row)
                 T.add(j_print)
                 print_sets(S, T)
-         print_is_matched()
+        print_is_matched()
 
 
     assignment = []
