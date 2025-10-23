@@ -23,7 +23,7 @@ def hungarian(cost):
     u = [0] + [min(row) for row in cost]
     v = [0.0] * (n + 1)
     p = [0] * (n + 1)
-    way = [0] * (n + 1)
+    pro1 = [0] * (n + 1)
     for i in range(1, n + 1):
         p[0] = i
         minv = [float("inf")] * (n + 1)
@@ -39,7 +39,7 @@ def hungarian(cost):
                     cur = cost[i0 - 1][j - 1] - u[i0] - v[j]
                     if cur < minv[j]:
                         minv[j] = cur
-                        way[j] = j0
+                        pro1[j] = j0
                     if minv[j] < delta:
                         delta = minv[j]
                         j1 = j
@@ -53,7 +53,7 @@ def hungarian(cost):
             if p[j0] == 0:
                 break
         while True:
-            j1 = way[j0]
+            j1 = pro1[j0]
             p[j0] = p[j1]
             j0 = j1
             if j0 == 0:
@@ -110,7 +110,7 @@ def hungarian_v(cost):
         print("U:", format(u))
         print("V:", format(v))
 
-    def print_matching_pairs():
+    def  print_is_matched():
         pairs = []
         for i in range(1, n + 1):
             col = next((j for j in range(1, n + 1) if r[j] == i), None)
@@ -145,7 +145,7 @@ def hungarian_v(cost):
             path_parts.append(f"R{row_last}->C{col_last}")
             print("Augmenting path: " + "=>".join(path_parts))
 
-        print_matching_pairs()
+         print_is_matched()
         j = j_free
         while j != 0:
             j_prev = pro[j]
@@ -211,7 +211,7 @@ def hungarian_v(cost):
                 S.add(matched_row)
                 T.add(j_print)
                 print_sets(S, T)
-        print_matching_pairs()
+         print_is_matched()
 
 
     assignment = []
